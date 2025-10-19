@@ -110,12 +110,22 @@ elif page == "企画側用（表示）":
     if password == ADMIN_PASS:
         st.success("認証成功！")
 
+        # 再読み込みボタンを追加
+        col1, col2 = st.columns([1, 5])
+        with col1:
+            if st.button("🔄 ファイルを再読み込み"):
+                st.rerun()
+        
+        with col2:
+            st.info("新しい画像がアップロードされた場合は、このボタンをクリックしてください")
+
         cleanup_old_files()
         files = sorted(os.listdir(PROCESSED_DIR), reverse=True)
 
         if not files:
             st.info("現在アップロードされた画像はありません。")
         else:
+            st.write(f"**現在の画像数: {len(files)}件**")
             for f in files:
                 path = os.path.join(PROCESSED_DIR, f)
                 upload_time = datetime.fromtimestamp(os.path.getmtime(path))
