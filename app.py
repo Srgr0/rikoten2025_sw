@@ -73,15 +73,15 @@ def process_image(src_path, outfile):
 # ページ切り替え
 # -----------------------------
 st.sidebar.title("メニュー")
-page = st.sidebar.radio("ページを選択", ["お客さん用（アップロード）", "企画側用（表示）"])
+page = st.sidebar.radio("ページを選択", ["ゲスト用（アップロード）", "企画側用（表示）"])
 
 
 # -----------------------------
 # お客さんページ
 # -----------------------------
-if page == "お客さん用（アップロード）":
+if page == "ゲスト用（アップロード）":
     st.title("画像アップロードページ")
-    uploaded_file = st.file_uploader("画像をアップロードしてください", type=["jpg", "png", "jpeg"])
+    uploaded_file = st.file_uploader("画像をアップロードしてください。著作権等の問題があるものはお控えください。\nアップロードされたファイルは約1時間後に自動で削除されます。", type=["jpg", "png", "jpeg"])
 
     if uploaded_file:
         # 保存先パス
