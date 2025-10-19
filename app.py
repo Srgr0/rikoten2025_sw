@@ -81,7 +81,8 @@ page = st.sidebar.radio("ページを選択", ["ゲスト用（アップロー�
 # -----------------------------
 if page == "ゲスト用（アップロード）":
     st.title("画像アップロードページ")
-    uploaded_file = st.file_uploader("画像をアップロードしてください。著作権等の問題があるものはお控えください。\nアップロードされたファイルは約1時間後に自動で削除されます。", type=["jpg", "png", "jpeg"])
+    st.markdown("画像をアップロードしてください。著作権等の問題があるものはお控えください。\nアップロードされたファイルは約1時間後に自動で削除されます。")
+    uploaded_file = st.file_uploader("", type=["jpg", "png", "jpeg"])
 
     if uploaded_file:
         # 保存先パス
