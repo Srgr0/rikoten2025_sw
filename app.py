@@ -111,13 +111,10 @@ elif page == "企画側用（表示）":
         st.success("認証成功！")
 
         # 再読み込みボタンを追加
-        col1, col2 = st.columns([1, 5])
+        col1, col2 = st.columns([1, 4])
         with col1:
             if st.button("🔄 ファイルを再読み込み"):
                 st.rerun()
-        
-        with col2:
-            st.info("新しい画像がアップロードされた場合は、このボタンをクリックしてください")
 
         cleanup_old_files()
         files = sorted(os.listdir(PROCESSED_DIR), reverse=True)
