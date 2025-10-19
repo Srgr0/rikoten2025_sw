@@ -11,7 +11,7 @@ PROCESSED_DIR = "uploads/processed"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(PROCESSED_DIR, exist_ok=True)
 
-ADMIN_PASS = "1234"  # ← 企画側パスコード
+ADMIN_PASS = "ADMIN_PASS"  # ← 企画側パスコード
 EXPIRE_SECONDS = 3600  # 1時間で削除
 
 
