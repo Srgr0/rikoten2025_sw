@@ -44,7 +44,7 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(PROCESSED_DIR, exist_ok=True)
 
 ADMIN_PASS = st.secrets.ADMIN_PASS  # 企画側パスコード(Streamlit Secretsで設定)
-EXPIRE_SECONDS = 3600  # ファイルの有効期限(秒)
+EXPIRE_SECONDS = 120  # ファイルの有効期限(秒)
 
 
 # -----------------------------
