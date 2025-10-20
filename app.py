@@ -135,7 +135,7 @@ if page == "ゲスト用（アップロード）":
         process_image(src_path, out_path)
 
         st.success("アップロード＆処理が完了しました！")
-        st.image(out_path, caption="加工後の画像", use_container_width=True)
+        st.image(out_path, caption="加工後の画像", width="stretch")
 
     cleanup_old_files()
 
@@ -167,6 +167,6 @@ elif page == "企画側用（表示）":
                 path = os.path.join(PROCESSED_DIR, f)
                 upload_time = datetime.fromtimestamp(os.path.getmtime(path))
                 expire_time = upload_time + timedelta(seconds=EXPIRE_SECONDS)
-                st.image(Image.open(path), caption=f"{f}（削除予定: {expire_time:%H:%M:%S}）", use_container_width=True)
+                st.image(Image.open(path), caption=f"{f}（削除予定: {expire_time:%H:%M:%S}）", width="stretch")
     elif password:
         st.error("パスコードが間違っています。")
