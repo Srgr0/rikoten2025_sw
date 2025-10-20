@@ -56,7 +56,6 @@ os.makedirs(PROCESSED_DIR, exist_ok=True)
 
 ADMIN_PASS = st.secrets.ADMIN_PASS  # 企画側パスコード(Streamlit Secretsで設定)
 EXPIRE_SECONDS = 120  # ファイルの有効期限(秒)
-STREAMLIT_SERVER_MAX_UPLOAD_SIZE = 30 # アップロード最大サイズ(MB)
 
 SUPPORTED_EXTENSIONS = ["jpg", "jpeg", "png", "heic", "heif"]
 FILE_UPLOADER_TYPES = list(dict.fromkeys(SUPPORTED_EXTENSIONS + [ext.upper() for ext in SUPPORTED_EXTENSIONS]))
