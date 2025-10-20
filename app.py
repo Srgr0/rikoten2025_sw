@@ -1,7 +1,18 @@
 import streamlit as st
 from PIL import Image, ImageDraw
+import importlib
+import importlib.util
 import math, os, time
 from datetime import datetime, timedelta
+
+HEIF_SUPPORTED = False
+register_heif_opener = None
+_heif_spec = importlib.util.find_spec("pillow_heif")
+if _heif_spec:
+    pillow_heif = importlib.import_module("pillow_heif")
+    register_heif_opener = pillow_heif.register_heif_opener
+    register_heif_opener()
+    HEIF_SUPPORTED = True
 
 st.set_page_config(page_title="Rikoten Image Processor", layout="wide", initial_sidebar_state="expanded")
 
@@ -45,6 +56,10 @@ os.makedirs(PROCESSED_DIR, exist_ok=True)
 
 ADMIN_PASS = st.secrets.ADMIN_PASS  # 企画側パスコード(Streamlit Secretsで設定)
 EXPIRE_SECONDS = 120  # ファイルの有効期限(秒)
+
+SUPPORTED_EXTENSIONS = ["jpg", "jpeg", "png", "heic", "heif"]
+FILE_UPLOADER_TYPES = list(dict.fromkeys(SUPPORTED_EXTENSIONS + [ext.upper() for ext in SUPPORTED_EXTENSIONS]))
+HEIF_EXTENSIONS = {"heic", "heif"}
 
 
 # -----------------------------
@@ -121,21 +136,43 @@ page = st.sidebar.radio("ページを選択", ["ゲスト用（アップロー�
 # -----------------------------
 if page == "ゲスト用（アップロード）":
     st.title("画像アップロードページ")
-    uploaded_file = st.file_uploader("画像をアップロードしてください。著作権等の問題があるものはお控えください。  \nアップロードされたファイルは約1時間後に自動で削除されます。", type=["jpg", "png", "jpeg"])
+    supported_display = ", ".join(ext.upper() for ext in SUPPORTED_EXTENSIONS)
+    upload_message = (
+        "画像をアップロードしてください。著作権等の問題があるものはお控えください。  \n"
+        "アップロードされたファイルは約1時間後に自動で削除されます。  \n"
+        f"対応形式: {supported_display}"
+    )
+    uploaded_file = st.file_uploader(upload_message, type=FILE_UPLOADER_TYPES)
+
+    if not HEIF_SUPPORTED:
+        st.info("HEIC/HEIF形式を処理するにはサーバー側で pillow-heif をインストールしてください。")
 
     if uploaded_file:
-        # 保存先パス
-        base_name = datetime.now().strftime("%Y%m%d_%H%M%S_") + uploaded_file.name
-        src_path = os.path.join(UPLOAD_DIR, base_name)
-        with open(src_path, "wb") as f:
-            f.write(uploaded_file.read())
+        safe_name = os.path.basename(uploaded_file.name)
+        ext = os.path.splitext(safe_name)[1].lower().lstrip(".")
 
-        # 加工実行
-        out_path = os.path.join(PROCESSED_DIR, f"processed_{base_name}")
-        process_image(src_path, out_path)
+        if ext not in SUPPORTED_EXTENSIONS:
+            st.error(f"対応している拡張子は {supported_display} です。")
+        elif ext in HEIF_EXTENSIONS and not HEIF_SUPPORTED:
+            st.error("HEIC/HEIF形式を扱うには pillow-heif をインストールしてください。")
+        else:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            stem = os.path.splitext(safe_name)[0] or "image"
+            stem = stem.replace(" ", "_")
 
-        st.success("アップロード＆処理が完了しました！")
-        st.image(out_path, caption="加工後の画像", width="stretch")
+            src_filename = f"{timestamp}_{stem}.{ext}"
+            src_path = os.path.join(UPLOAD_DIR, src_filename)
+            with open(src_path, "wb") as f:
+                f.write(uploaded_file.read())
+
+            processed_ext = "png" if ext in HEIF_EXTENSIONS else ext
+            processed_filename = f"processed_{timestamp}_{stem}.{processed_ext}"
+            out_path = os.path.join(PROCESSED_DIR, processed_filename)
+
+            process_image(src_path, out_path)
+
+            st.success("アップロード＆処理が完了しました！")
+            st.image(out_path, caption="加工後の画像", width="stretch")
 
     cleanup_old_files()
 
