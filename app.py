@@ -103,7 +103,10 @@ def process_image(src_path, outfile):
     half = center_square // 2
     draw.rectangle([cx - half, cy - half, cx + half, cy + half], outline=(255, 255, 255, 255), width=6)
 
-    canvas.save(outfile)
+    canvas_to_save = canvas
+    if outfile.lower().endswith((".jpg", ".jpeg")):
+        canvas_to_save = canvas.convert("RGB")
+    canvas_to_save.save(outfile)
 
 
 # -----------------------------
