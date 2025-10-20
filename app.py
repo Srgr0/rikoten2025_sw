@@ -3,6 +3,38 @@ from PIL import Image, ImageDraw
 import math, os, time
 from datetime import datetime, timedelta
 
+st.set_page_config(page_title="Rikoten Image Processor", layout="wide", initial_sidebar_state="expanded")
+
+DARK_MODE_CSS = """
+<style>
+html, body {
+    background-color: #0e1117;
+    color: #e5e7eb;
+}
+[data-testid="stAppViewContainer"], [data-testid="stSidebar"], [data-testid="stHeader"] {
+    background-color: #0e1117;
+    color: #e5e7eb;
+}
+[data-testid="stSidebar"] * {
+    color: #e5e7eb !important;
+}
+.stButton>button, .stDownloadButton>button {
+    background-color: #1f2933;
+    color: #e5e7eb;
+    border: 1px solid #3e4c59;
+}
+.stButton>button:hover, .stDownloadButton>button:hover {
+    background-color: #323f4b;
+    border-color: #52606d;
+}
+.stRadio>div>label, .stFileUploader label {
+    color: #e5e7eb;
+}
+</style>
+"""
+
+st.markdown(DARK_MODE_CSS, unsafe_allow_html=True)
+
 # -----------------------------
 # 設定
 # -----------------------------
@@ -11,8 +43,8 @@ PROCESSED_DIR = "uploads/processed"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(PROCESSED_DIR, exist_ok=True)
 
-ADMIN_PASS = st.secrets.ADMIN_PASS  # ← 企画側パスコード
-EXPIRE_SECONDS = 3600  # 1時間で削除
+ADMIN_PASS = st.secrets.ADMIN_PASS  # 企画側パスコード(Streamlit Secretsで設定)
+EXPIRE_SECONDS = 3600  # ファイルの有効期限(秒)
 
 
 # -----------------------------
@@ -35,13 +67,18 @@ def process_image(src_path, outfile):
     ring_radius = 330
     angles = [0, 90, 180, 270]
     center_square_ratio = 0.05  # 中央白枠の大きさ（キャンバスに対する割合）
+    margin = 20  # リング中心からの余白
 
     im = Image.open(src_path).convert("RGBA")
+    original_width, original_height = im.size
 
-    # 元画像サイズを維持してリサイズ
-    max_dim = int(canvas_size * 0.35)
-    scale = min(max_dim / im.width, max_dim / im.height)
-    im = im.resize((int(im.width * scale), int(im.height * scale)), Image.Resampling.LANCZOS)
+    # 元画像サイズを維持してリサイズ（隣の画像と重ならないよう調整）
+    max_extent = ring_radius - margin
+    scale = min(1.0, max_extent / original_width, max_extent / original_height)
+    if scale < 1.0:
+        resized_width = max(1, int(original_width * scale))
+        resized_height = max(1, int(original_height * scale))
+        im = im.resize((resized_width, resized_height), Image.Resampling.LANCZOS)
 
     # キャンバス作成
     canvas = Image.new("RGBA", (canvas_size, canvas_size), (0, 0, 0, 255))
